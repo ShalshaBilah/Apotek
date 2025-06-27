@@ -1,0 +1,11 @@
+nama_pembeli,nama_obat,jumlah,penyakit,kategori_encoded,cluster,kategori_penyakit
+Shalsha,ANDALAN PIL KB,1,tablet,2,2,tablet
+Shalsha,"BISOPROLOL 2,5MG NOVEL 10'S X 10TAB",1,tablet,2,2,tablet
+Shanum,BODREX FLU&BATUK BRDHAK (HJ) TAB,1,tablet,2,2,tablet
+Afi,TEMPRA SYR 30ML,1,Demam,1,0,Demam
+Afi,OB HERBAL 60ML,1,Batuk,0,0,Batuk
+Tidak Diketahui,OB HERBAL 60ML,1,Batuk,0,0,Batuk
+Tidak Diketahui,TEMPRA SYR 30ML,1,Demam,1,0,Demam
+Tidak Diketahui,TEMPRA SYRUP 60ML,1,Demam,1,0,Demam
+Tidak Diketahui,OB HERBAL 60ML,3,Batuk,0,1,Batuk
+Shalsha,TEMPRA SYR 30ML,5,Demam,1,1,Demam

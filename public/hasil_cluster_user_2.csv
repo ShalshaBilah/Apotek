@@ -1,0 +1,11 @@
+nama_pembeli,nama_obat,jumlah,penyakit,cluster
+3,ANDALAN PIL KB,1,tablet,2
+3,"BISOPROLOL 2,5MG NOVEL 10'S X 10TAB",1,tablet,2
+5,BODREX FLU&BATUK BRDHAK (HJ) TAB,1,tablet,2
+4,TEMPRA SYR 30ML,1,Demam,1
+4,OB HERBAL 60ML,1,Batuk,0
+0,OB HERBAL 60ML,1,Batuk,0
+0,TEMPRA SYR 30ML,1,Demam,1
+0,TEMPRA SYRUP 60ML,1,Demam,1
+0,OB HERBAL 60ML,3,Batuk,0
+3,TEMPRA SYR 30ML,5,Demam,1
