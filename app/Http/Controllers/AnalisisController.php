@@ -135,7 +135,7 @@ class AnalisisController extends Controller
             })
             ->select(
                 'produk.nama_produk as nama_obat',
-                'prodaks.kategori as penyakit',
+                'prodaks.gejala as penyakit',
                 'penjualan_detail.jumlah',
                 'penjualan.created_at'
             )

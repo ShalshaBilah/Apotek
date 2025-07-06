@@ -15,7 +15,7 @@ if __name__ == "__main__":
         pembelian_user = json.load(f)
 
     # Menentukan path model
-    model_path = "D:/telu/apotik-main/storage/app/public/tren2.pkl"
+    model_path = "D:/telu/apotik-main/storage/app/public/tren_optimal1.pkl"
 
     # Inisialisasi dan prediksi
     analis = AnalisisTrenPenyakit(model_path)
