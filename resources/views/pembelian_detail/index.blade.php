@@ -143,7 +143,9 @@
 
     @includeIf('pembelian_detail.produk')
 @endsection
-
+<script>
+    const id_pembelian = {{ $id_pembelian }};
+</script>
 @push('scripts')
     <script>
         let table, table2;
@@ -157,7 +159,7 @@
                 serverSide: true,
                 autoWidth: false,
                 ajax: {
-                    url: '{{ route('pembelian_detail.data', $id_pembelian) }}',
+                    url: `/pembelian_detail/${id_pembelian}/data`,
                 },
                 columns: [
                     { data: 'DT_RowIndex', searchable: false, sortable: false },
@@ -175,6 +177,7 @@
                 .on('draw.dt', function () {
                     loadForm($('#diskon').val());
                 });
+
             table2 = $('.table-produk').DataTable();
 
             $(document).on('input', '.quantity', function () {
@@ -192,17 +195,15 @@
                     return;
                 }
 
-                // Perbaikan: pastikan CSRF token terpasang dengan benar dan method PUT
                 $.ajax({
-                    url: `/pembelian_detail/${id}`, // Gunakan URL yang benar
-                    type: 'POST', // Gunakan POST karena Laravel meresapi method lain melalui _method
+                    url: `/pembelian_detail/${id}`,
+                    type: 'POST',
                     data: {
                         '_token': $('[name=csrf-token]').attr('content'),
-                        '_method': 'PUT', // Laravels _method hack to handle PUT method
+                        '_method': 'PUT',
                         'jumlah': jumlah
                     },
                     success: function (response) {
-                        // Reload table dan form setelah data berhasil disimpan
                         table.ajax.reload(() => loadForm($('#diskon').val()));
                     },
                     error: function (xhr) {
@@ -210,7 +211,6 @@
                     }
                 });
             });
-
 
             $(document).on('input', '#diskon', function () {
                 if ($(this).val() == "") {
@@ -241,7 +241,7 @@
         }
 
         function tambahProduk() {
-            $.post('{{ route('pembelian_detail.store') }}', $('.form-produk').serialize())
+            $.post('/pembelian_detail', $('.form-produk').serialize())
                 .done(response => {
                     $('#kode_produk').focus();
                     table.ajax.reload(() => loadForm($('#diskon').val()));
@@ -272,7 +272,7 @@
             $('#total').val($('.total').text());
             $('#total_item').val($('.total_item').text());
 
-            $.get(`{{ url('/pembelian_detail/loadform') }}/${diskon}/${$('.total').text()}`)
+            $.get(`/pembelian_detail/loadform/${diskon}/${$('.total').text()}`)
                 .done(response => {
                     $('#totalrp').val('Rp. ' + response.totalrp);
                     $('#bayarrp').val('Rp. ' + response.bayarrp);

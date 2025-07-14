@@ -154,7 +154,9 @@
     @includeIf('penjualan_detail.produk')
     @includeIf('penjualan_detail.modal')
 @endsection
-
+<script>
+    const id_penjualan = {{ $id_penjualan }};
+</script>
 @push('scripts')
     <script>
         let table, table2;
@@ -168,7 +170,7 @@
                 serverSide: true,
                 autoWidth: false,
                 ajax: {
-                    url: '{{ route('transaksi.data', $id_penjualan) }}',
+                    url: `/transaksi/${id_penjualan}/data`,
                 },
                 columns: [
                     { data: 'DT_RowIndex', searchable: false, sortable: false },
@@ -190,6 +192,7 @@
                         $('#diterima').trigger('input');
                     }, 300);
                 });
+
             table2 = $('.table-produk').DataTable();
 
             $(document).on('input', '.quantity', function () {
@@ -207,7 +210,7 @@
                     return;
                 }
 
-                $.post(`{{ url('/transaksi') }}/${id}`, {
+                $.post(`/transaksi/${id}`, {
                     '_token': $('[name=csrf-token]').attr('content'),
                     '_method': 'put',
                     'jumlah': jumlah
@@ -222,7 +225,6 @@
                         return;
                     });
             });
-
 
             $(document).on('input', '#diskon', function () {
                 if ($(this).val() == "") {
@@ -263,7 +265,7 @@
         }
 
         function tambahProduk() {
-            $.post('{{ route('transaksi.store') }}', $('.form-produk').serialize())
+            $.post('/transaksi', $('.form-produk').serialize())
                 .done(response => {
                     $('#kode_produk').focus();
                     table.ajax.reload(() => loadForm($('#diskon').val()));
@@ -281,8 +283,6 @@
         function pilihMember(id, kode) {
             $('#id_member').val(id);
             $('#kode_member').val(kode);
-
-            // Ubah nilai diskon otomatis menjadi 5
             $('#diskon').val(5);
 
             loadForm($('#diskon').val());
@@ -314,7 +314,7 @@
             $('#total').val($('.total').text());
             $('#total_item').val($('.total_item').text());
 
-            $.get(`{{ url('/transaksi/loadform') }}/${diskon}/${$('.total').text()}/${diterima}`)
+            $.get(`/transaksi/loadform/${diskon}/${$('.total').text()}/${diterima}`)
                 .done(response => {
                     $('#totalrp').val('Rp. ' + response.totalrp);
                     $('#bayarrp').val('Rp. ' + response.bayarrp);
@@ -331,7 +331,7 @@
                 .fail(errors => {
                     alert('Tidak dapat menampilkan data');
                     return;
-                })
+                });
         }
 
         function tampilUser() {
@@ -341,14 +341,11 @@
         function pilihUser(id, name) {
             $('#id_member').val(id);
             $('#nama_user').val(name);
-
-            // Misal: tetapkan diskon tetap atau sesuai logika pengguna
             $('#diskon').val(5);
 
             loadForm($('#diskon').val());
             $('#diterima').val(0).focus().select();
             $('#modal-user').modal('hide');
         }
-
     </script>
 @endpush
