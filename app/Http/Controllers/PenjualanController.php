@@ -78,42 +78,43 @@ class PenjualanController extends Controller
         return redirect()->route('dashboard')->with('success', 'Pembelian berhasil dan analisis tren penyakit diperbarui.');
     }
 
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
-        // Cari Penjualan berdasarkan id
         $penjualan = Penjualan::find($id);
 
-        // Periksa apakah Penjualan ditemukan
         if (!$penjualan) {
+            if ($request->ajax()) {
+                return response()->json(['error' => 'Penjualan tidak ditemukan.'], 404);
+            }
             return redirect()->route('penjualan.index')->with('error', 'Penjualan tidak ditemukan.');
         }
 
-        // Menghapus detail penjualan terkait
         $detail = PenjualanDetail::where('id_penjualan', $penjualan->id_penjualan)->get();
         foreach ($detail as $item) {
             $produk = Produk::find($item->id_produk);
             if ($produk) {
                 $produk->stok += $item->jumlah;
-                $produk->update();
+                $produk->save();
             }
-
-            // Menghapus detail penjualan
             $item->delete();
         }
 
-        // Menghapus Penjualan
         $penjualan->delete();
+
+        if ($request->ajax()) {
+            return response()->json(['message' => 'Penjualan berhasil dihapus.']);
+        }
 
         return redirect()->route('penjualan.index')->with('delete', 'Penjualan berhasil dihapus');
     }
 
-    public function deletepenjualan($id)
-    {
-        $penjualan = Penjualan::find($id);
-        $penjualan->delete();
-        return redirect()->route('penjualan.index')->with('delete', 'Penjualan Berhasil Dihapus');
+    // public function deletepenjualan($id)
+    // {
+    //     $penjualan = Penjualan::find($id);
+    //     $penjualan->delete();
+    //     return redirect()->route('penjualan.index')->with('delete', 'Penjualan Berhasil Dihapus');
 
-    }
+    // }
 
     public function selesai()
     {

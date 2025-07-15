@@ -17,16 +17,14 @@
                 </div>
             </div>
         </div>
+
+        <!-- Content -->
         <section class="content">
             <div class="container-fluid">
                 <div class="row">
                     <div class="col-12">
                         <div class="card">
                             <div class="card-header d-flex justify-content-between align-items-center">
-
-                                <!-- Modal -->
-
-
                                 <div class="card-tools ml-auto">
                                     <form action="{{ route('penjualan.index') }}" method="GET"
                                         class="d-flex justify-content-end">
@@ -48,87 +46,64 @@
                                     <div class="alert alert-danger">{{ $message }}</div>
                                 @endif
 
-
-                                <form action="" method="POST" target="_blank">
-                                    @csrf
-                                    <table class="table table-striped table-bordered table-hover">
-                                        <thead class="thead-dark">
+                                <table class="table table-striped table-bordered table-hover">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th width="5%">No</th>
+                                            <th>Tanggal</th>
+                                            <th>Nama Pembeli</th>
+                                            <th>Total Item</th>
+                                            <th>Total Harga</th>
+                                            <th>Diskon</th>
+                                            <th>Total Bayar</th>
+                                            <th>Kasir</th>
+                                            <th width="15%"><i class="fa fa-cog"></i></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($penjualan as $index => $row)
                                             <tr>
-                                                <th width="5%">No</th>
-                                                <th>Tanggal</th>
-                                                <th>Nama Pembeli</th>
-                                                <th>Total Item</th>
-                                                <th>Total Harga</th>
-                                                <th>Diskon</th>
-                                                <th>Total Bayar</th>
-                                                <th>Kasir</th>
-                                                <th width="15%"><i class="fa fa-cog"></i></th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @php
-                                                $no = 1; // Jika tidak menggunakan pagination, bisa mulai dari 1
-                                            @endphp
-                                            @foreach ($penjualan as $index => $row)
-                                                <tr>
-                                                    <!-- Nomor urut -->
-                                                    <th scope="row">{{ $index + $penjualan->firstItem() }}</th>
-
-                                                    <!-- Tanggal -->
-                                                    <td>{{ tanggal_indonesia($row->created_at) }}</td>
-
-                                                    <!-- Kode Member -->
-                                                    <td>
-                                                        <span
-                                                            style="background-color: #28a745; color: white; padding: 2px 8px; border-radius: 4px; display: inline-block;">
-                                                            {{ $row->users->name ?? 'Tidak ada nama' }}
-                                                            <!-- Menampilkan nama pembeli jika ada -->
-                                                        </span>
-                                                    </td>
-
-                                                    <!-- Total Item -->
-                                                    <td>{{ $row->total_item }}</td>
-
-                                                    <!-- Total Harga -->
-                                                    <td>{{ number_format($row->total_harga, 0, ',', '.') }}</td>
-
-                                                    <!-- Diskon -->
-                                                    <td>{{ $row->diskon }}%</td>
-
-                                                    <!-- Total Bayar -->
-                                                    <td>{{ number_format($row->bayar, 0, ',', '.') }}</td>
-
-                                                    <!-- Kasir -->
-                                                    <td>{{ Auth::user()->name }}</td>
-
-                                                    <!-- Aksi -->
-                                                    <td>
-                                                        <div class="btn-group">
-                                                            <!-- Tombol Lihat Detail -->
-                                                            <a href="{{ route('penjualan.show', $row->id_penjualan) }}"
-                                                                class="btn btn-sm btn-info">
-                                                                <i class="fa fa-eye"></i>
-                                                            </a>
-                                                            <!-- Tombol Hapus -->
-                                                            <button
-                                                                onclick="if(confirm('Yakin ingin menghapus ini?')) { window.location.href='/deletepenjualan/{{ $row->id_penjualan }}'; }"
-                                                                class="btn btn-danger btn-sm ml-2" data-toggle="tooltip"
-                                                                title="Hapus Pengeluaran">
+                                                <th scope="row">{{ $index + $penjualan->firstItem() }}</th>
+                                                <td>{{ tanggal_indonesia($row->created_at) }}</td>
+                                                <td>
+                                                    <span
+                                                        style="background-color: #28a745; color: white; padding: 2px 8px; border-radius: 4px;">
+                                                        {{ $row->users->name ?? 'Tidak ada nama' }}
+                                                    </span>
+                                                </td>
+                                                <td>{{ $row->total_item }}</td>
+                                                <td>{{ number_format($row->total_harga, 0, ',', '.') }}</td>
+                                                <td>{{ $row->diskon }}%</td>
+                                                <td>{{ number_format($row->bayar, 0, ',', '.') }}</td>
+                                                <td>{{ Auth::user()->name }}</td>
+                                                <td>
+                                                    <div class="btn-group">
+                                                        <a href="{{ route('penjualan.show', $row->id_penjualan) }}"
+                                                            class="btn btn-sm btn-info">
+                                                            <i class="fa fa-eye"></i>
+                                                        </a>
+                                                        <form action="{{ route('penjualan.destroy', $row->id_penjualan) }}"
+                                                            method="POST"
+                                                            onsubmit="return confirm('Yakin ingin menghapus data ini?')"
+                                                            style="display:inline-block;">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="btn btn-danger btn-sm">
                                                                 <i class="fa fa-trash"></i>
                                                             </button>
+                                                        </form>
 
 
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
-                                    <div class="d-flex justify-content-end" style="margin-top: 20px;">
-                                        {{$penjualan->links()}}
-                                    </div>
-                                </form>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
 
+                                <div class="d-flex justify-content-end mt-3">
+                                    {{ $penjualan->links() }}
+                                </div>
 
                             </div>
                         </div>
@@ -138,33 +113,32 @@
         </section>
     </div>
 @endsection
+
 @push('scripts')
     <script>
-        let table, table1;
-
         function deleteData(url) {
             if (confirm('Yakin ingin menghapus data ini?')) {
                 fetch(url, {
                     method: 'DELETE',
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                        'Content-Type': 'application/json'
+                        'Accept': 'application/json'
                     }
                 })
                     .then(response => {
-                        if (!response.ok) throw new Error('Gagal menghapus data');
+                        if (!response.ok) {
+                            throw new Error('Gagal menghapus data');
+                        }
                         return response.json();
                     })
                     .then(data => {
-                        alert('Data berhasil dihapus');
+                        alert(data.message); // dari controller
                         location.reload();
                     })
                     .catch(error => {
-                        alert('Terjadi kesalahan: ' + error);
+                        alert('Terjadi kesalahan: ' + error.message);
                     });
             }
         }
-
-
     </script>
 @endpush

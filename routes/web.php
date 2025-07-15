@@ -207,12 +207,14 @@ Route::middleware(['auth', 'can:manage pembelian'])->group(function () {
 });
 
 Route::middleware(['auth', 'can:manage penjualan'])->group(function () {
-    // Rute Penjualan
     Route::get('/penjualan/data', [PenjualanController::class, 'data'])->name('penjualan.data');
     Route::get('/penjualan', [PenjualanController::class, 'index'])->name('penjualan.index');
     Route::get('/penjualan/{id}/show', [PenjualanController::class, 'show'])->name('penjualan.show');
+
+    // ✅ Pastikan ini ada dan benar
     Route::delete('/penjualan/{id}', [PenjualanController::class, 'destroy'])->name('penjualan.destroy');
-    Route::get('/deletepenjualan/{id}', action: [PenjualanController::class, 'deletepenjualan'])->name('deletepenjualan');
+
+    // Route::get('/deletepenjualan/{id}', action: [PenjualanController::class, 'deletepenjualan'])->name('deletepenjualan');
 
     // Rute Transaksi
     Route::get('/transaksi/baru', [PenjualanController::class, 'create'])->name('transaksi.baru');
