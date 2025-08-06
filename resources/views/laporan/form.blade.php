@@ -17,7 +17,12 @@
                                     <span class="input-group-text"><i class="fa fa-calendar"></i></span>
                                 </div>
                                 <input type="date" name="tanggal_awal" id="tanggal_awal" class="form-control" required
-                                    autofocus value="{{ request('tanggal_awal') }}" placeholder="Pilih tanggal awal">
+                                    autofocus value="{{ request('tanggal_awal') }}" placeholder="Pilih tanggal awal"
+                                    max="{{ date('Y-m-d') }}">
+                                @error('tanggal_awal')
+                                    <small class="text-danger">{{ $message }}</small>
+                                @enderror
+
                             </div>
                             <small class="form-text text-muted">Masukkan tanggal awal laporan.</small>
                         </div>
@@ -32,7 +37,11 @@
                                 </div>
                                 <input type="date" name="tanggal_akhir" id="tanggal_akhir" class="form-control" required
                                     value="{{ request('tanggal_akhir') ?? date('Y-m-d') }}"
-                                    placeholder="Pilih tanggal akhir">
+                                    placeholder="Pilih tanggal akhir" max="{{ date('Y-m-d') }}">
+                                @error('tanggal_akhir')
+                                    <small class="text-danger">{{ $message }}</small>
+                                @enderror
+
                             </div>
                             <small class="form-text text-muted">Masukkan tanggal akhir laporan.</small>
                         </div>

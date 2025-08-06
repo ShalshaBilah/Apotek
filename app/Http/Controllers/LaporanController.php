@@ -7,6 +7,7 @@ use App\Models\Pembelian;
 use App\Models\Pengeluaran;
 use App\Models\Penjualan;
 use PDF;
+use Illuminate\Support\Facades\Validator;
 
 
 class LaporanController extends Controller
@@ -16,12 +17,21 @@ class LaporanController extends Controller
         $tanggalAwal = date('Y-m-d', mktime(0, 0, 0, date('m'), 1, date('Y')));
         $tanggalAkhir = date('Y-m-d');
 
-        if ($request->has('tanggal_awal') && $request->tanggal_awal != "" && $request->has('tanggal_akhir') && $request->tanggal_akhir != "") {
+        if ($request->has('tanggal_awal') && $request->has('tanggal_akhir')) {
+            // Validasi manual
+            $validator = Validator::make($request->all(), [
+                'tanggal_awal' => 'required|date|before_or_equal:today',
+                'tanggal_akhir' => 'required|date|after_or_equal:tanggal_awal|before_or_equal:today',
+            ]);
+
+            if ($validator->fails()) {
+                return redirect()->back()->withErrors($validator)->withInput();
+            }
+
             $tanggalAwal = $request->tanggal_awal;
             $tanggalAkhir = $request->tanggal_akhir;
         }
 
-        // Ambil data laporan menggunakan getData
         $dataLaporan = $this->getData($tanggalAwal, $tanggalAkhir);
 
         return view('laporan.index', compact('tanggalAwal', 'tanggalAkhir', 'dataLaporan'));

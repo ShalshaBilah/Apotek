@@ -12,6 +12,8 @@ use Symfony\Component\Process\Exception\ProcessFailedException;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection; // pastikan import ini ada
+
 
 class AnalisisController extends Controller
 {
@@ -117,20 +119,18 @@ class AnalisisController extends Controller
 
     public function trenPenyakit(Request $request)
     {
-        // Cek apakah user login
         $user = auth()->user();
-        $user_id = $user ? $user->id : null; // Jika tidak login, user_id menjadi null
+        $user_id = $user ? $user->id : null;
 
-        // Ambil data pembelian dari database
         $pembelian = DB::table('penjualan')
             ->join('penjualan_detail', 'penjualan.id_penjualan', '=', 'penjualan_detail.id_penjualan')
             ->join('produk', 'penjualan_detail.id_produk', '=', 'produk.id_produk')
             ->join('prodaks', 'produk.nama_produk', '=', 'prodaks.nama')
             ->where(function ($query) use ($user_id) {
                 if ($user_id) {
-                    $query->where('penjualan.id_member', $user_id); // Jika login, ambil berdasarkan user_id
+                    $query->where('penjualan.id_member', $user_id);
                 } else {
-                    $query->whereNull('penjualan.id_member'); // Jika tidak login, ambil data dengan id_member null
+                    $query->whereNull('penjualan.id_member');
                 }
             })
             ->select(
@@ -142,13 +142,10 @@ class AnalisisController extends Controller
             ->get()
             ->toArray();
 
-        // Periksa apakah data tersedia
         if (count($pembelian) === 0) {
-            // Jika tidak ada data pembelian, kirimkan array kosong
-            return view('users.dashboard', ['hasil' => []]);
+            return view('users.dashboard', ['hasil' => [], 'paginatedHasil' => null]);
         }
 
-        // Mengonversi data ke format yang dibutuhkan
         $pembelian_array = array_map(function ($item) use ($user_id) {
             $tanggal = Carbon::parse($item->created_at);
             return [
@@ -158,28 +155,25 @@ class AnalisisController extends Controller
                 'day' => $tanggal->day,
                 'month' => $tanggal->month,
                 'year' => $tanggal->year,
-                'nama_pembeli' => $user_id ? $user_id : -1, // Jika user_id null, set -1
+                'created_at' => $tanggal->toDateString(),
+                'nama_pembeli' => $user_id ? $user_id : -1,
             ];
         }, $pembelian);
 
-        // Simpan ke file JSON
         $inputPath = storage_path('app/public/pembelian_user.json');
         file_put_contents($inputPath, json_encode($pembelian_array));
 
-        // Jalankan skrip Python
         $process = new Process([
             'C:\\Program Files\\Python311\\python.exe',
             base_path('app/python/prediksi_tren.py'),
-            $user_id ?? 0 // Mengirimkan user_id yang digunakan dalam proses Python, jika null kirimkan 0
+            $user_id ?? 0
         ], null, [
             'PYTHONPATH' => 'C:\\Users\\Rafidatus Salsabilah\\AppData\\Roaming\\Python\\Python311\\site-packages'
         ]);
-
         $process->run();
 
         if (!$process->isSuccessful()) {
-            // Jika proses gagal, tampilkan error
-            dd($process->getErrorOutput()); // Tampilkan pesan error
+            dd($process->getErrorOutput());
         }
 
         $hasilPath = storage_path('app/public/hasil_tren_user.json');
@@ -189,9 +183,56 @@ class AnalisisController extends Controller
             return view('users.dashboard', ['hasil' => [], 'paginatedHasil' => null]);
         }
 
-        // Pagination Manual
+        // Tambahkan total pembelian
+        $total_per_obat = collect($hasil_array)
+            ->groupBy('nama_obat')
+            ->map(function ($items) {
+                return collect($items)->sum('jumlah');
+            });
+
+        $hasil_array = array_map(function ($item) use ($total_per_obat) {
+            $item['total_pembelian'] = $total_per_obat[$item['nama_obat']] ?? 0;
+            return $item;
+        }, $hasil_array);
+
+        // ⬇️ Tambahkan filter bulan dan tahun jika dipilih
+        if ($request->has('bulan') && $request->has('tahun')) {
+            $bulan = (int) $request->bulan;
+            $tahun = (int) $request->tahun;
+
+            $hasil_array = array_filter($hasil_array, function ($item) use ($bulan, $tahun) {
+                return (int) $item['month'] === $bulan && (int) $item['year'] === $tahun;
+            });
+        }
+
+        $rekap_obat = collect($hasil_array)
+            ->groupBy(fn($item) => $item['nama_obat'] . '-' . $item['month'] . '-' . $item['year'])
+            ->map(function ($group) {
+                $first = $group->first();
+                return [
+                    'nama_obat' => $first['nama_obat'],
+                    'month' => $first['month'],
+                    'year' => $first['year'],
+                    'jumlah_kemunculan' => count($group),
+                ];
+            })
+            ->sortByDesc('jumlah_kemunculan')
+            ->values(); // penting: reset key numerik
+
+        // Pagination untuk rekap
+        $pageRekap = $request->input('page_rekap', 1); // parameter khusus untuk rekap
+        $perPageRekap = 5;
+        $rekapPaginator = new LengthAwarePaginator(
+            $rekap_obat->forPage($pageRekap, $perPageRekap),
+            $rekap_obat->count(),
+            $perPageRekap,
+            $pageRekap,
+            ['pageName' => 'page_rekap', 'path' => url()->current(), 'query' => $request->query()]
+        );
+
+        // Pagination
         $page = $request->input('page', 1);
-        $perPage = 10;
+        $perPage = 5;
         $collection = collect($hasil_array);
         $paginatedHasil = new LengthAwarePaginator(
             $collection->forPage($page, $perPage)->values(),
@@ -202,8 +243,10 @@ class AnalisisController extends Controller
         );
 
         return view('users.dashboard', [
-            'hasil' => $hasil_array,
-            'paginatedHasil' => $paginatedHasil
+            'hasil' => $collection->values()->all(),
+            'paginatedHasil' => $paginatedHasil,
+            'rekapPaginated' => $rekapPaginator
+
         ]);
     }
 

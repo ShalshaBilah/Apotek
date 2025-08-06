@@ -99,6 +99,11 @@
             <a href="#"><b>Apotek</b> Telu</a>
         </div>
         <p class="login-box-msg">Sign in to start your session</p>
+        @if ($errors->has('email'))
+            <div class="alert alert-danger">
+                {{ $errors->first('email') }}
+            </div>
+        @endif
         <form action="{{ route('login') }}" method="post">
             @csrf
             <div class="form-group">

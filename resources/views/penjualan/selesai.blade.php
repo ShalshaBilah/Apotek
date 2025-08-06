@@ -1,34 +1,34 @@
 @extends('layouts.master')
 
 @section('title')
-Transaksi Penjualan
+    Transaksi Penjualan
 @endsection
 
 @section('breadcrumb')
-@parent
-<li class="active">Transaksi Penjualan</li>
+    @parent
+    <li class="active">Transaksi Penjualan</li>
 @endsection
 
 @section('content')
-<div class="row">
-    <div class="col-lg-12">
-        <div class="box">
-            <div class="box-body">
-                <div class="alert alert-success alert-dismissible">
-                    <i class="fa fa-check icon"></i>
-                    Data Transaksi telah selesai.
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="box">
+                <div class="box-body">
+                    <div class="alert alert-success alert-dismissible">
+                        <i class="fa fa-check icon"></i>
+                        Data Transaksi telah selesai.
+                    </div>
                 </div>
-            </div>
-            <div class="box-footer">
-                <button class="btn btn-warning btn-flat"
-                    onclick="notaKecil('{{ route('transaksi.nota_kecil') }}', 'Nota Kecil')">Cetak Nota Kecil</button>
-                <button class="btn btn-warning btn-flat"
-                    onclick="notaBesar('{{ route('transaksi.nota_besar') }}', 'Nota PDF')">Cetak Nota Besar</button>
-                <a href="{{ route('transaksi.baru') }}" class="btn btn-primary btn-flat">Transaksi Baru</a>
+                <div class="box-footer">
+                    <button class="btn btn-warning btn-flat"
+                        onclick="notaKecil('{{ route('transaksi.nota_kecil') }}', 'Nota Kecil')">Cetak Nota Kecil</button>
+                    <!-- <button class="btn btn-warning btn-flat"
+                        onclick="notaBesar('{{ route('transaksi.nota_besar') }}', 'Nota PDF')">Cetak Nota Besar</button> -->
+                    <a href="{{ route('transaksi.baru') }}" class="btn btn-primary btn-flat">Transaksi Baru</a>
+                </div>
             </div>
         </div>
     </div>
-</div>
 @endsection
 
 @push('scripts')
@@ -56,12 +56,12 @@ Transaksi Penjualan
             const top = (height - h) / 2 / systemZoom + dualScreenTop
             const newWindow = window.open(url, title,
                 `
-                            scrollbars=yes,
-                            width  = ${w / systemZoom}, 
-                            height = ${h / systemZoom}, 
-                            top    = ${top}, 
-                            left   = ${left}
-                        `
+                                scrollbars=yes,
+                                width  = ${w / systemZoom}, 
+                                height = ${h / systemZoom}, 
+                                top    = ${top}, 
+                                left   = ${left}
+                            `
             );
 
             if (window.focus) newWindow.focus();

@@ -179,12 +179,23 @@ class PembelianController extends Controller
         return $pdf->stream('pembelian_' . $pembelian->id_pembelian . '.pdf');
     }
 
-    public static function grafik()
+    public static function grafik($bulan = null, $tahun = null)
     {
-        // Ambil data pengeluaran per bulan
-        return Pembelian::selectRaw('MONTH(created_at) as bulan, SUM(total_harga) as total')
-            ->groupBy('bulan')
-            ->orderBy('bulan')
-            ->get();
+        $query = Pembelian::selectRaw('MONTH(created_at) as bulan, SUM(total_harga) as total');
+
+        if ($bulan) {
+            $query->whereMonth('created_at', $bulan);
+        }
+
+        if ($tahun) {
+            $query->whereYear('created_at', $tahun);
+        }
+
+        if (!$bulan && !$tahun) {
+            $query->whereYear('created_at', now()->year);
+        }
+
+        return $query->groupBy('bulan')->orderBy('bulan')->get();
     }
+
 }

@@ -85,7 +85,11 @@ class PenjualanDetailController extends Controller
     {
         $produk = Produk::where('id_produk', $request->id_produk)->first();
         if (!$produk) {
-            return response()->json('Data gagal disimpan', 400);
+            return response()->json(['message' => 'Produk tidak ditemukan'], 404);
+        }
+
+        if ($produk->stok < 1) {
+            return response()->json(['message' => 'Stok produk tidak mencukupi'], 400);
         }
 
         $detail = new PenjualanDetail();
@@ -95,20 +99,26 @@ class PenjualanDetailController extends Controller
         $detail->jumlah = 1;
         $detail->diskon = $produk->diskon;
         $detail->subtotal = $produk->harga_jual - ($produk->diskon / 100 * $produk->harga_jual);
-        ;
         $detail->save();
 
-        return response()->json('Data berhasil disimpan', 200);
+        return response()->json(['message' => 'Produk berhasil ditambahkan'], 200);
     }
+
 
     public function update(Request $request, $id)
     {
         $detail = PenjualanDetail::find($id);
+        $produk = Produk::find($detail->id_produk);
+
+        if ($request->jumlah > $produk->stok) {
+            return response()->json(['message' => 'Jumlah melebihi stok tersedia!'], 400);
+        }
+
         $detail->jumlah = $request->jumlah;
         $detail->subtotal = $detail->harga_jual * $request->jumlah - (($detail->diskon * $request->jumlah) / 100 * $detail->harga_jual);
-        ;
         $detail->update();
     }
+
 
     public function destroy($id)
     {

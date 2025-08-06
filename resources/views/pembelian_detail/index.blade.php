@@ -148,22 +148,24 @@
 </script>
 @push('scripts')
     <script>
+        // Inisialisasi variabel global table dan table2 untuk DataTable.
         let table, table2;
-
+        // Menyembunyikan sidebar saat halaman dimuat.
         $(function () {
             $('body').addClass('sidebar-collapse');
 
+            // Menggunakan DataTables untuk menampilkan data pembelian detail dari server secara AJAX (server-side).
             table = $('.table-pembelian').DataTable({
                 responsive: true,
                 processing: true,
                 serverSide: true,
                 autoWidth: false,
                 ajax: {
-                    url: `/pembelian_detail/${id_pembelian}/data`,
+                    url: `/pembelian_detail/${id_pembelian}/data`, //URL pembelian_detail/${id_pembelian}/data akan dipanggil untuk mengambil data JSON.
                 },
                 columns: [
                     { data: 'DT_RowIndex', searchable: false, sortable: false },
-                    { data: 'kode_produk' },
+                    { data: 'kode_produk' }, //Menentukan kolom-kolom tabel yang akan ditampilkan.
                     { data: 'nama_produk' },
                     { data: 'harga_beli' },
                     { data: 'jumlah' },
@@ -177,13 +179,15 @@
                 .on('draw.dt', function () {
                     loadForm($('#diskon').val());
                 });
+            //Setiap kali tabel selesai digambar (misalnya setelah reload), fungsi loadForm akan dijalankan untuk menghitung ulang total, diskon, dan lainnya.
 
             table2 = $('.table-produk').DataTable();
+            //Tabel kedua (table2) digunakan untuk menampilkan daftar produk, biasanya di dalam modal.
 
             $(document).on('input', '.quantity', function () {
                 let id = $(this).data('id');
                 let jumlah = parseInt($(this).val());
-
+                //Ketika user mengubah jumlah pembelian:
                 if (jumlah < 1) {
                     $(this).val(1);
                     alert('Jumlah tidak boleh kurang dari 1');
@@ -211,7 +215,7 @@
                     }
                 });
             });
-
+            //Saat user mengetik diskon, akan memicu loadForm untuk menghitung ulang total, bayar, dan terbilang.
             $(document).on('input', '#diskon', function () {
                 if ($(this).val() == "") {
                     $(this).val(0).select();

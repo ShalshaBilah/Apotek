@@ -164,14 +164,25 @@ class PenjualanController extends Controller
         $pdf->setPaper(0, 0, 609, 440, 'potrait');
         return $pdf->stream('Transaksi-' . date('Y-m-d-his') . '.pdf');
     }
-    public static function grafik()
+    public static function grafik($bulan = null, $tahun = null)
     {
-        // Ambil data pengeluaran per bulan
-        return Penjualan::selectRaw('MONTH(created_at) as bulan, SUM(total_harga) as total')
-            ->groupBy('bulan')
-            ->orderBy('bulan')
-            ->get();
+        $query = Penjualan::selectRaw('MONTH(created_at) as bulan, SUM(total_harga) as total');
+
+        if ($bulan) {
+            $query->whereMonth('created_at', $bulan);
+        }
+
+        if ($tahun) {
+            $query->whereYear('created_at', $tahun);
+        }
+
+        if (!$bulan && !$tahun) {
+            $query->whereYear('created_at', now()->year);
+        }
+
+        return $query->groupBy('bulan')->orderBy('bulan')->get();
     }
+
 
 
     public function dashboard()

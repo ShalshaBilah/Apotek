@@ -78,10 +78,12 @@
                                     <div class="form-group">
                                         <label for="bulan">Pilih Bulan</label>
                                         <select class="form-control" name="bulan" id="bulan">
-                                            @foreach ($daftar_bulan as $bulan)
-                                                <option value="{{ $bulan }}" {{ request('bulan') == $bulan ? 'selected' : '' }}>
-                                                    {{ $nama_bulan[$bulan] }}
-                                                </option>
+                                            @foreach (range(1, 12) as $bulan)
+                                                @if($daftar_bulan->contains($bulan))
+                                                    <option value="{{ $bulan }}" {{ request('bulan') == $bulan ? 'selected' : '' }}>
+                                                        {{ $nama_bulan[$bulan] }}
+                                                    </option>
+                                                @endif
                                             @endforeach
                                         </select>
                                     </div>
@@ -220,78 +222,39 @@
                         @endif
                     </div>
                 </div>
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Jumlah Kasus</h5>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped">
+                                <thead class="thead-dark">
+                                    <tr>
+                                        <th>Nama Obat</th>
+                                        <th>Bulan</th>
+                                        <th>Tahun</th>
+                                        <th>Jumlah Kasus</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($rekapPaginated as $data)
+                                        <tr>
+                                            <td>{{ $data['nama_obat'] }}</td>
+                                            <td>{{ $nama_bulan[(int) $data['month']] }}</td>
+                                            <td>{{ $data['year'] }}</td>
+                                            <td>{{ $data['jumlah_kemunculan'] }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
 
-                {{-- Scatter Plot K-Means --}}
-                <!-- <div class="card mb-4 shadow-sm mt-4">
-                                                            <div class="card-body">
-                                                                <h5 class="card-title text-center">Visualisasi Plot K-Means (Scatter)</h5>
-                                                                <canvas id="kmeansScatterChart"></canvas>
-                                                            </div>
-                                                        </div>
+                            {{-- Pagination link khusus rekap --}}
+                            <div class="d-flex justify-content-center">
+                                {{ $rekapPaginated->appends(request()->except('page'))->links() }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-                                                        <script>
-                                                            const colors = ['#ff6384', '#36a2eb', '#ffcd56', '#4bc0c0', '#9966ff', '#f67019'];
-
-                                                            const scatterData = {
-                                                                datasets: [
-                                                                    @foreach(collect($hasil)->groupBy('cluster') as $cluster => $items)
-                                                                        {
-                                                                                label: 'Cluster {{ $cluster }}',
-                                                                                data: [
-                                                                                    @foreach($items as $item)
-                                                                                        { x: {{ $item['month'] }}, y: {{ $item['jumlah'] }}, label: '{{ $item['nama_obat'] }}' },
-                                                                                    @endforeach
-                                                                            ],
-                                                                                backgroundColor: colors[{{ $cluster }} % colors.length]
-                                                                            },
-                                                                    @endforeach
-                                                        ]
-                                                            };
-
-                                                            const scatterOptions = {
-                                                                responsive: true,
-                                                                plugins: {
-                                                                    tooltip: {
-                                                                        callbacks: {
-                                                                            label: function (context) {
-                                                                                const data = context.raw;
-                                                                                return `${data.label}: (Bulan: ${data.x}, Jumlah: ${data.y})`;
-                                                                            }
-                                                                        }
-                                                                    },
-                                                                    legend: { display: true }
-                                                                },
-                                                                scales: {
-                                                                    x: {
-                                                                        title: {
-                                                                            display: true,
-                                                                            text: 'Bulan'
-                                                                        },
-                                                                        ticks: {
-                                                                            stepSize: 1,
-                                                                            callback: value => value
-                                                                        }
-                                                                    },
-                                                                    y: {
-                                                                        beginAtZero: true,
-                                                                        title: {
-                                                                            display: true,
-                                                                            text: 'Jumlah Pembelian'
-                                                                        }
-                                                                    }
-                                                                }
-                                                            };
-
-                                                            const ctxScatter = document.getElementById('kmeansScatterChart').getContext('2d');
-                                                            new Chart(ctxScatter, {
-                                                                type: 'scatter',
-                                                                data: scatterData,
-                                                                options: scatterOptions
-                                                            });
-                                                        </script> -->
-
-
-                {{-- Tabel Detail --}}
                 {{-- Tabel Detail --}}
                 <div class="card shadow-sm">
                     <div class="card-body">
@@ -323,17 +286,18 @@
 
                             {{-- Pagination Link --}}
                             <div class="d-flex justify-content-center">
-                                {{ $paginatedHasil->links() }}
+                                {{ $paginatedHasil->appends(request()->query())->links() }}
                             </div>
                         </div>
                     </div>
                 </div>
 
             @else
-            <div class="alert alert-info text-center">
-                Tidak ada data analisis.
-            </div>
+                <div class="alert alert-info text-center">
+                    Tidak ada data analisis.
+                </div>
             @endif
         </div>
+
     </section>
 @endsection

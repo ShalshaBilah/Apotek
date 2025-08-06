@@ -45,16 +45,16 @@
                         </div>
                     </div>
                     <!-- <div class="col-lg-3 col-6">
-                                    <div class="small-box bg-warning">
-                                        <div class="inner">
-                                            <h3>{{ $jumlahmember }}</h3>
-                                            <p>Member</p>
-                                        </div>y
-                                        <div class="icon">
-                                            <i class="fas fa-warehouse"></i>
-                                        </div>
-                                    </div>
-                                </div> -->
+                                                                        <div class="small-box bg-warning">
+                                                                            <div class="inner">
+                                                                                <h3>{{ $jumlahmember }}</h3>
+                                                                                <p>Member</p>
+                                                                            </div>y
+                                                                            <div class="icon">
+                                                                                <i class="fas fa-warehouse"></i>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div> -->
                     <div class="col-lg-3 col-6">
                         <div class="small-box bg-danger">
                             <div class="inner">
@@ -67,6 +67,51 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Grafik Pembelian & Penjualan - DITARIK KE ATAS -->
+                @foreach ([['Grafik Pembelian Bulanan', 'pembelianChart', $pembelian, 'Pembelian', 'rgba(255, 159, 64, 1)', 'rgba(255, 159, 64, 0.2)'], ['Grafik Penjualan Bulanan', 'penjualanChart', $penjualan, 'Penjualan', 'rgba(153, 102, 255, 1)', 'rgba(153, 102, 255, 0.2)']] as [$title, $chartId, $data, $label, $borderColor, $backgroundColor])
+                    <form action="{{ url('/dashboard') }}" method="GET" class="row g-3 mb-4">
+                        <div class="col-md-3">
+                            <label for="bulan" class="form-label">Bulan</label>
+                            <select name="bulan" id="bulan" class="form-select">
+                                <option value="">-- Semua Bulan --</option>
+                                @foreach(range(1, 12) as $b)
+                                    <option value="{{ $b }}" {{ request('bulan') == $b ? 'selected' : '' }}>
+                                        {{ DateTime::createFromFormat('!m', $b)->format('F') }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label for="tahun" class="form-label">Tahun</label>
+                            <select name="tahun" id="tahun" class="form-select">
+                                <option value="">-- Semua Tahun --</option>
+                                @foreach(range(date('Y'), 2020) as $t)
+                                    <option value="{{ $t }}" {{ request('tahun') == $t ? 'selected' : '' }}>{{ $t }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="col-md-3 align-self-end">
+                            <button type="submit" class="btn btn-primary">Tampilkan</button>
+                        </div>
+                    </form>
+
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card shadow-sm">
+                                <div class="card-header bg-gradient-light">
+                                    <h3 class="card-title">{{ $title }}</h3>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="{{ $chartId }}" width="400" height="200"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+
                 <form method="GET" action="{{ url('/dashboard') }}" class="row g-3 mb-4">
                     <div class="col-md-3">
                         <label for="minggu" class="form-label">Minggu</label>
@@ -159,22 +204,7 @@
                 </div>
 
 
-                <!-- Grafik -->
-                <!-- Grafik -->
-                @foreach ([['Grafik Pembelian Bulanan', 'pembelianChart', $pembelian, 'Pembelian', 'rgba(255, 159, 64, 1)', 'rgba(255, 159, 64, 0.2)'], ['Grafik Penjualan Bulanan', 'penjualanChart', $penjualan, 'Penjualan', 'rgba(153, 102, 255, 1)', 'rgba(153, 102, 255, 0.2)']] as [$title, $chartId, $data, $label, $borderColor, $backgroundColor])
-                    <div class="row mt-4">
-                        <div class="col-12">
-                            <div class="card shadow-sm">
-                                <div class="card-header bg-gradient-light">
-                                    <h3 class="card-title">{{ $title }}</h3>
-                                </div>
-                                <div class="card-body">
-                                    <canvas id="{{ $chartId }}" width="400" height="200"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                @endforeach
+
 
             </div>
         </section>
@@ -281,17 +311,16 @@
 
         // Line chart untuk pengeluaran, pembelian, dan penjualan
         const chartConfigs = [
-
             {
                 id: 'pembelianChart',
-                labels: @json($pembelian->pluck('bulan')),
+                labels: @json($pembelian->pluck('bulan')->map(fn($b) => namaBulan($b))),
                 data: @json($pembelian->pluck('total')),
                 color: ['rgb(218, 4, 83)', 'rgba(255, 159, 64, 0.2)'],
                 label: 'Pembelian'
             },
             {
                 id: 'penjualanChart',
-                labels: @json($penjualan->pluck('bulan')),
+                labels: @json($penjualan->pluck('bulan')->map(fn($b) => namaBulan($b))),
                 data: @json($penjualan->pluck('total')),
                 color: ['rgb(4, 196, 100)', 'rgba(153, 102, 255, 0.2)'],
                 label: 'Penjualan'
@@ -339,8 +368,11 @@
                             bodyColor: '#fff',
                             footerColor: '#ddd',
                             callbacks: {
-                                label: ctx => `Rp ${ctx.raw.toLocaleString('id-ID')}`,
-                                footer: items => `Total: Rp ${items.reduce((a, b) => a + b.raw, 0).toLocaleString('id-ID')}`
+                                label: ctx => `Rp ${Number(ctx.raw).toLocaleString('id-ID')}`,
+                                footer: items => {
+                                    const total = items.reduce((acc, item) => acc + Number(item.raw), 0);
+                                    return `Total: Rp ${total.toLocaleString('id-ID')}`;
+                                }
                             }
                         }
                     },

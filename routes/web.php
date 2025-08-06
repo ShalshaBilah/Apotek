@@ -67,9 +67,9 @@ Route::middleware(['auth', 'can:manage dashboard'])->group(function () {
         $jumlahmember = Member::count();
         $jumlahsupplier = Supplier::count();
 
-        $pengeluaran = PengeluaranController::grafik();
-        $pembelian = PembelianController::grafik();
-        $penjualan = PenjualanController::grafik();
+        $pengeluaran = PengeluaranController::grafik($bulan, $tahun);
+        $pembelian = PembelianController::grafik($bulan, $tahun);
+        $penjualan = PenjualanController::grafik($bulan, $tahun);
         $obatPalingLaku = PenjualanController::obatPalingLaku($bulan, $tahun, $minggu);
 
         return view('welcome', compact(

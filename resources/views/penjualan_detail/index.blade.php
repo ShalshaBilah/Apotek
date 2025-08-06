@@ -204,11 +204,6 @@
                     alert('Jumlah tidak boleh kurang dari 1');
                     return;
                 }
-                if (jumlah > 10000) {
-                    $(this).val(10000);
-                    alert('Jumlah tidak boleh lebih dari 10000');
-                    return;
-                }
 
                 $.post(`/transaksi/${id}`, {
                     '_token': $('[name=csrf-token]').attr('content'),
@@ -221,8 +216,8 @@
                         });
                     })
                     .fail(errors => {
-                        alert('Tidak dapat menyimpan data');
-                        return;
+                        alert(errors.responseJSON?.message ?? 'Gagal mengubah jumlah');
+                        table.ajax.reload();
                     });
             });
 
@@ -271,7 +266,7 @@
                     table.ajax.reload(() => loadForm($('#diskon').val()));
                 })
                 .fail(errors => {
-                    alert('Tidak dapat menyimpan data');
+                    alert('Stok Habis');
                     return;
                 });
         }
